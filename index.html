@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luca est un bg</title>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5731436585611983"
+     crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #003366;
+            color: white;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 90%;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+        
+        h1 {
+            color: #FFCC00;
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .page {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        /* Setup Page Styles */
+        .setup-form {
+            background-color: #004080;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #FFCC00;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #002244;
+            border-radius: 5px;
+            background-color: #001F3F;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .category-container {
+            margin-top: 20px;
+            border-top: 1px solid #0066CC;
+            padding-top: 20px;
+        }
+        
+        button {
+            background-color: #FFCC00;
+            color: #003366;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-top: 20px;
+            display: block;
+            width: 100%;
+        }
+        
+        #toggle-qa {
+            background-color: #006699;
+            color: white;
+            margin: 0;
+            margin-bottom: 15px;
+        }
+        
+        button:hover {
+            background-color: #FFD700;
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        /* Game Page Styles */
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .team-score {
+            background-color: #004080;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: center;
+            min-width: 120px;
+            margin: 5px;
+        }
+        
+        .team-name {
+            font-weight: bold;
+            color: #FFCC00;
+            margin-bottom: 5px;
+        }
+        
+        .score {
+            font-size: 1.5rem;
+        }
+        
+        .game-board {
+            display: grid;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .category-header {
+            background-color: #002255;
+            color: #FFCC00;
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .question-cell {
+            background-color: #004080;
+            color: #FFCC00;
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.5rem;
+            cursor: pointer;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+        
+        .question-cell:hover {
+            background-color: #0066CC;
+        }
+        
+        .question-cell.used {
+            background-color: #001F3F;
+            color: #004080;
+            cursor: default;
+        }
+        
+        /* Question Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: #004080;
+            padding: 30px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .question-text {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            line-height: 1.4;
+        }
+        
+        .answer-text {
+            font-size: 1.25rem;
+            color: #FFCC00;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #003366;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        
+        .modal-button {
+            margin: 5px;
+            min-width: 120px;
+        }
+        
+        .close-modal {
+            background-color: #CC0000;
+            color: white;
+        }
+        
+        .show-answer {
+            background-color: #0066CC;
+            color: white;
+        }
+        
+        .award-buttons {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .toggle-buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .ad-container {
+            margin: 20px auto;
+            text-align: center;
+            max-width: 100%;
+            overflow: hidden;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .game-board {
+                grid-gap: 5px;
+            }
+            
+            .category-header, .question-cell {
+                padding: 5px;
+                font-size: 0.8rem;
+                height: auto;
+            }
+            
+            .question-cell {
+                font-size: 1rem;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 15px;
+            }
+            
+            .question-text {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>JEOPARDY</h1>
+        
+        <!-- Setup Page -->
+        <div id="setup-page" class="page active">
+            <div class="setup-form">
+                <div class="form-group">
+                    <label for="num-teams">Number of Teams:</label>
+                    <select id="num-teams">
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                </div>
+                
+                <div id="team-names-container"></div>
+                
+                <div class="form-group">
+                    <label for="num-categories">Number of Categories:</label>
+                    <select id="num-categories">
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6" selected>6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="num-questions">Questions per Category:</label>
+                    <select id="num-questions">
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5" selected>5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <button type="button" id="toggle-qa">Hide Q&A Fields</button>
+                </div>
+
+                <div id="categories-container" class="category-container">
+                    <!-- Categories will be dynamically added here -->
+                </div>
+                
+                <button id="start-game">Start Game</button>
+            </div>
+        </div>
+        
+        <!-- Game Page -->
+        <div id="game-page" class="page">
+            <div class="toggle-buttons">
+                <button id="back-to-setup">Back to Setup</button>
+            </div>
+            
+            <div class="scoreboard" id="scoreboard">
+                <!-- Team scores will be dynamically added here -->
+            </div>
+            
+            <div class="game-board" id="game-board">
+                <!-- Game board will be dynamically built here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Question Modal -->
+    <div id="question-modal" class="modal">
+        <div class="modal-content">
+            <div class="question-text" id="modal-question"></div>
+            <div class="answer-text" id="modal-answer"></div>
+            
+            <div class="modal-buttons">
+                <button class="modal-button show-answer" id="show-answer">Show Answer</button>
+                <button class="modal-button close-modal" id="close-question">Close</button>
+            </div>
+            
+            <div class="award-buttons" id="award-buttons">
+                <!-- Award buttons will be added dynamically -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const setupPage = document.getElementById('setup-page');
+            const gamePage = document.getElementById('game-page');
+            const numTeamsSelect = document.getElementById('num-teams');
+            const teamNamesContainer = document.getElementById('team-names-container');
+            const numCategoriesSelect = document.getElementById('num-categories');
+            const numQuestionsSelect = document.getElementById('num-questions');
+            const categoriesContainer = document.getElementById('categories-container');
+            const startGameButton = document.getElementById('start-game');
+            const backToSetupButton = document.getElementById('back-to-setup');
+            const scoreboardContainer = document.getElementById('scoreboard');
+            const gameBoardContainer = document.getElementById('game-board');
+            const questionModal = document.getElementById('question-modal');
+            const modalQuestion = document.getElementById('modal-question');
+            const modalAnswer = document.getElementById('modal-answer');
+            const showAnswerButton = document.getElementById('show-answer');
+            const closeQuestionButton = document.getElementById('close-question');
+            const awardButtonsContainer = document.getElementById('award-buttons');
+            
+            let currentQuestion = null;
+            let teamScores = [];
+            
+            // Initialize team names input fields
+            function updateTeamNameInputs() {
+                const numTeams = parseInt(numTeamsSelect.value);
+                teamNamesContainer.innerHTML = '';
+                
+                for (let i = 1; i <= numTeams; i++) {
+                    const teamGroup = document.createElement('div');
+                    teamGroup.className = 'form-group';
+                    
+                    const label = document.createElement('label');
+                    label.setAttribute('for', `team-name-${i}`);
+                    label.textContent = `Team ${i} Name:`;
+                    
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = `team-name-${i}`;
+                    input.value = `Team ${i}`;
+                    
+                    teamGroup.appendChild(label);
+                    teamGroup.appendChild(input);
+                    teamNamesContainer.appendChild(teamGroup);
+                }
+            }
+            
+            // Initialize category inputs
+            function updateCategoryInputs() {
+                const numCategories = parseInt(numCategoriesSelect.value);
+                categoriesContainer.innerHTML = '';
+                
+                for (let i = 1; i <= numCategories; i++) {
+                    const categoryGroup = document.createElement('div');
+                    categoryGroup.className = 'form-group';
+                    
+                    const label = document.createElement('label');
+                    label.setAttribute('for', `category-${i}`);
+                    label.textContent = `Category ${i}:`;
+                    
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = `category-${i}`;
+                    input.placeholder = `Enter category ${i} name`;
+                    
+                    categoryGroup.appendChild(label);
+                    categoryGroup.appendChild(input);
+                    categoriesContainer.appendChild(categoryGroup);
+                    
+                    // Create inputs for questions and answers
+                    const numQuestions = parseInt(numQuestionsSelect.value);
+                    for (let j = 1; j <= numQuestions; j++) {
+                        const pointValue = j * 200;
+                        
+                        // Question input
+                        const questionGroup = document.createElement('div');
+                        questionGroup.className = 'form-group qa-field';
+                        
+                        const questionLabel = document.createElement('label');
+                        questionLabel.setAttribute('for', `question-${i}-${j}`);
+                        questionLabel.textContent = `Category ${i}: ${pointValue} Question:`;
+                        
+                        const questionInput = document.createElement('input');
+                        questionInput.type = 'text';
+                        questionInput.id = `question-${i}-${j}`;
+                        questionInput.placeholder = `Enter ${pointValue} question`;
+                        
+                        questionGroup.appendChild(questionLabel);
+                        questionGroup.appendChild(questionInput);
+                        categoriesContainer.appendChild(questionGroup);
+                        
+                        // Answer input
+                        const answerGroup = document.createElement('div');
+                        answerGroup.className = 'form-group qa-field';
+                        
+                        const answerLabel = document.createElement('label');
+                        answerLabel.setAttribute('for', `answer-${i}-${j}`);
+                        answerLabel.textContent = `Category ${i}: ${pointValue} Answer:`;
+                        
+                        const answerInput = document.createElement('input');
+                        answerInput.type = 'text';
+                        answerInput.id = `answer-${i}-${j}`;
+                        answerInput.placeholder = `Enter answer for ${pointValue} question`;
+                        
+                        answerGroup.appendChild(answerLabel);
+                        answerGroup.appendChild(answerInput);
+                        categoriesContainer.appendChild(answerGroup);
+                    }
+                }
+            }
+            
+            // Build scoreboard
+            function buildScoreboard() {
+                scoreboardContainer.innerHTML = '';
+                
+                teamScores = [];
+                const numTeams = parseInt(numTeamsSelect.value);
+                
+                for (let i = 1; i <= numTeams; i++) {
+                    const teamNameInput = document.getElementById(`team-name-${i}`);
+                    const teamName = teamNameInput.value || `Team ${i}`;
+                    
+                    teamScores.push({
+                        name: teamName,
+                        score: 0
+                    });
+                    
+                    const scoreElement = document.createElement('div');
+                    scoreElement.className = 'team-score';
+                    scoreElement.innerHTML = `
+                        <div class="team-name">${teamName}</div>
+                        <div class="score" id="score-${i-1}">$0</div>
+                    `;
+                    
+                    scoreboardContainer.appendChild(scoreElement);
+                }
+            }
+            
+            // Build game board
+            function buildGameBoard() {
+                gameBoardContainer.innerHTML = '';
+                
+                const numCategories = parseInt(numCategoriesSelect.value);
+                const numQuestions = parseInt(numQuestionsSelect.value);
+                
+                // Set grid template columns based on number of categories
+                gameBoardContainer.style.gridTemplateColumns = `repeat(${numCategories}, 1fr)`;
+                
+                // Add category headers
+                for (let i = 1; i <= numCategories; i++) {
+                    const categoryInput = document.getElementById(`category-${i}`);
+                    const categoryName = categoryInput.value || `Category ${i}`;
+                    
+                    const categoryHeader = document.createElement('div');
+                    categoryHeader.className = 'category-header';
+                    categoryHeader.textContent = categoryName;
+                    
+                    gameBoardContainer.appendChild(categoryHeader);
+                }
+                
+                // Add question cells
+                for (let j = 1; j <= numQuestions; j++) {
+                    const pointValue = j * 200;
+                    
+                    for (let i = 1; i <= numCategories; i++) {
+                        const questionCell = document.createElement('div');
+                        questionCell.className = 'question-cell';
+                        questionCell.textContent = `$${pointValue}`;
+                        questionCell.dataset.category = i;
+                        questionCell.dataset.question = j;
+                        questionCell.dataset.value = pointValue;
+                        
+                        questionCell.addEventListener('click', function() {
+                            if (!this.classList.contains('used')) {
+                                openQuestion(i, j, pointValue);
+                                this.classList.add('used');
+                            }
+                        });
+                        
+                        gameBoardContainer.appendChild(questionCell);
+                    }
+                }
+            }
+            
+            // Open question modal
+            function openQuestion(categoryIndex, questionIndex, value) {
+                const questionInput = document.getElementById(`question-${categoryIndex}-${questionIndex}`);
+                const answerInput = document.getElementById(`answer-${categoryIndex}-${questionIndex}`);
+                const question = questionInput.value || `Question for $${value}`;
+                const answer = answerInput.value || `Answer for $${value}`;
+                
+                currentQuestion = {
+                    category: categoryIndex,
+                    index: questionIndex,
+                    value: value,
+                    text: question,
+                    answer: answer
+                };
+                
+                modalQuestion.textContent = question;
+                modalAnswer.textContent = answer;
+                modalAnswer.style.display = 'none';
+                
+                // Update award buttons
+                awardButtonsContainer.innerHTML = '';
+                awardButtonsContainer.style.display = 'none';
+                
+                questionModal.style.display = 'flex';
+            }
+            
+            // Show answer
+            function showAnswer() {
+                modalAnswer.style.display = 'block';
+                showAnswerButton.style.display = 'none';
+                
+                // Create award buttons for each team
+                awardButtonsContainer.innerHTML = '';
+                
+                // Create award buttons
+                teamScores.forEach((team, index) => {
+                    // Correct button
+                    const correctButton = document.createElement('button');
+                    correctButton.className = 'modal-button';
+                    correctButton.textContent = `${team.name} +$${currentQuestion.value}`;
+                    correctButton.addEventListener('click', function() {
+                        awardPoints(index, currentQuestion.value);
+                    });
+                    awardButtonsContainer.appendChild(correctButton);
+                    
+                    // Incorrect button
+                    const incorrectButton = document.createElement('button');
+                    incorrectButton.className = 'modal-button';
+                    incorrectButton.style.backgroundColor = '#CC0000';
+                    incorrectButton.textContent = `${team.name} -$${currentQuestion.value}`;
+                    incorrectButton.addEventListener('click', function() {
+                        awardPoints(index, -currentQuestion.value);
+                    });
+                    awardButtonsContainer.appendChild(incorrectButton);
+                });
+                
+                awardButtonsContainer.style.display = 'block';
+            }
+            
+            // Award points to team
+            function awardPoints(teamIndex, points) {
+                teamScores[teamIndex].score += points;
+                document.getElementById(`score-${teamIndex}`).textContent = `$${teamScores[teamIndex].score}`;
+            }
+            
+            // Close question modal
+            function closeQuestionModal() {
+                questionModal.style.display = 'none';
+                showAnswerButton.style.display = 'block';
+            }
+            
+            // Toggle Q&A visibility
+            function toggleQAVisibility() {
+                const qaFields = document.querySelectorAll('.qa-field');
+                const toggleButton = document.getElementById('toggle-qa');
+                
+                let isHidden = toggleButton.textContent === 'Show Q&A Fields';
+                
+                qaFields.forEach(field => {
+                    field.style.display = isHidden ? 'block' : 'none';
+                });
+                
+                toggleButton.textContent = isHidden ? 'Hide Q&A Fields' : 'Show Q&A Fields';
+            }
+            
+            // Event Listeners
+            numTeamsSelect.addEventListener('change', updateTeamNameInputs);
+            numCategoriesSelect.addEventListener('change', updateCategoryInputs);
+            numQuestionsSelect.addEventListener('change', updateCategoryInputs);
+            
+            startGameButton.addEventListener('click', function() {
+                setupPage.classList.remove('active');
+                gamePage.classList.add('active');
+                buildScoreboard();
+                buildGameBoard();
+            });
+            
+            backToSetupButton.addEventListener('click', function() {
+                gamePage.classList.remove('active');
+                setupPage.classList.add('active');
+            });
+            
+            showAnswerButton.addEventListener('click', showAnswer);
+            closeQuestionButton.addEventListener('click', closeQuestionModal);
+            document.getElementById('toggle-qa').addEventListener('click', toggleQAVisibility);
+            
+            // Initialize the form
+            updateTeamNameInputs();
+            updateCategoryInputs();
+        });
+    </script>
+</body>
+</html>
