@@ -193,6 +193,56 @@
             cursor: default;
         }
         
+        /* Setup Grid Styles */
+        .setup-grid {
+            display: grid;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .setup-category-header {
+            background-color: #002255;
+            color: #FFCC00;
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .setup-question-cell {
+            background-color: #004080;
+            color: #FFCC00;
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1rem;
+            height: auto;
+            min-height: 60px;
+        }
+        
+        .setup-question-input, .setup-answer-input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #002244;
+            border-radius: 5px;
+            background-color: #001F3F;
+            color: white;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .setup-value-label {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
         /* Question Modal */
         .modal {
             display: none;
@@ -675,68 +725,71 @@
                     }
                 }, 1000);
             }
-            // Initialize category inputs
+            
+            // Initialize category inputs in a grid layout
             function updateCategoryInputs() {
                 const numCategories = parseInt(numCategoriesSelect.value);
+                const numQuestions = parseInt(numQuestionsSelect.value);
                 categoriesContainer.innerHTML = '';
                 
+                // Create the setup grid
+                const setupGrid = document.createElement('div');
+                setupGrid.className = 'setup-grid';
+                
+                // Set grid template columns based on number of categories
+                setupGrid.style.gridTemplateColumns = `repeat(${numCategories}, 1fr)`;
+                
+                // Add category headers
                 for (let i = 1; i <= numCategories; i++) {
                     const categoryGroup = document.createElement('div');
                     categoryGroup.className = 'form-group';
                     
-                    const label = document.createElement('label');
-                    label.setAttribute('for', `category-${i}`);
-                    label.textContent = `Category ${i}:`;
+                    const categoryHeader = document.createElement('div');
+                    categoryHeader.className = 'setup-category-header';
                     
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.id = `category-${i}`;
-                    input.placeholder = `Enter category ${i} name`;
+                    const categoryInput = document.createElement('input');
+                    categoryInput.type = 'text';
+                    categoryInput.id = `category-${i}`;
+                    categoryInput.className = 'setup-question-input';
+                    categoryInput.placeholder = `Category ${i}`;
+                    categoryInput.value = `Category ${i}`;
                     
-                    categoryGroup.appendChild(label);
-                    categoryGroup.appendChild(input);
-                    categoriesContainer.appendChild(categoryGroup);
+                    categoryHeader.appendChild(categoryInput);
+                    setupGrid.appendChild(categoryHeader);
+                }
+                
+                // Add question cells
+                for (let j = 1; j <= numQuestions; j++) {
+                    const pointValue = j * 200;
                     
-                    // Create inputs for questions and answers
-                    const numQuestions = parseInt(numQuestionsSelect.value);
-                    for (let j = 1; j <= numQuestions; j++) {
-                        const pointValue = j * 200;
+                    for (let i = 1; i <= numCategories; i++) {
+                        const questionCell = document.createElement('div');
+                        questionCell.className = 'setup-question-cell';
                         
-                        // Question input
-                        const questionGroup = document.createElement('div');
-                        questionGroup.className = 'form-group qa-field';
-                        
-                        const questionLabel = document.createElement('label');
-                        questionLabel.setAttribute('for', `question-${i}-${j}`);
-                        questionLabel.textContent = `Category ${i}: ${pointValue} Question:`;
+                        const valueLabel = document.createElement('span');
+                        valueLabel.className = 'setup-value-label';
+                        valueLabel.textContent = `$${pointValue}`;
                         
                         const questionInput = document.createElement('input');
                         questionInput.type = 'text';
                         questionInput.id = `question-${i}-${j}`;
-                        questionInput.placeholder = `Enter ${pointValue} question`;
-                        
-                        questionGroup.appendChild(questionLabel);
-                        questionGroup.appendChild(questionInput);
-                        categoriesContainer.appendChild(questionGroup);
-                        
-                        // Answer input
-                        const answerGroup = document.createElement('div');
-                        answerGroup.className = 'form-group qa-field';
-                        
-                        const answerLabel = document.createElement('label');
-                        answerLabel.setAttribute('for', `answer-${i}-${j}`);
-                        answerLabel.textContent = `Category ${i}: ${pointValue} Answer:`;
+                        questionInput.className = 'setup-question-input';
+                        questionInput.placeholder = `Question text`;
                         
                         const answerInput = document.createElement('input');
                         answerInput.type = 'text';
                         answerInput.id = `answer-${i}-${j}`;
-                        answerInput.placeholder = `Enter answer for ${pointValue} question`;
+                        answerInput.className = 'setup-answer-input';
+                        answerInput.placeholder = `Answer text`;
                         
-                        answerGroup.appendChild(answerLabel);
-                        answerGroup.appendChild(answerInput);
-                        categoriesContainer.appendChild(answerGroup);
+                        questionCell.appendChild(valueLabel);
+                        questionCell.appendChild(questionInput);
+                        questionCell.appendChild(answerInput);
+                        setupGrid.appendChild(questionCell);
                     }
                 }
+                
+                categoriesContainer.appendChild(setupGrid);
             }
             
             // Build scoreboard
@@ -909,7 +962,7 @@
             
             // Toggle Q&A visibility
             function toggleQAVisibility() {
-                const qaFields = document.querySelectorAll('.qa-field');
+                const qaFields = document.querySelectorAll('.setup-question-cell');
                 const toggleButton = document.getElementById('toggle-qa');
                 
                 let isHidden = toggleButton.textContent === 'Show Q&A Fields';
