@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luca est un bg</title>
+    <title>Jeopardy</title>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5731436585611983"
      crossorigin="anonymous"></script>
     <style>
@@ -253,6 +253,18 @@
         .toggle-buttons {
             margin-top: 20px;
             text-align: center;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .toggle-buttons button {
+            width: 48%;
+            margin-top: 0;
+        }
+        
+        #end-game {
+            background-color: #CC0000;
+            color: white;
         }
         
         .ad-container {
@@ -260,6 +272,79 @@
             text-align: center;
             max-width: 100%;
             overflow: hidden;
+        }
+        
+        /* Results Page Styles */
+        .leaderboard {
+            background-color: #004080;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            margin-top: 20px;
+        }
+        
+        .leaderboard-title {
+            color: #FFCC00;
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .leaderboard-table th {
+            background-color: #002255;
+            color: #FFCC00;
+            font-weight: bold;
+        }
+        
+        .leaderboard-table tr:nth-child(odd) {
+            background-color: #003366;
+        }
+        
+        .leaderboard-table tr:nth-child(even) {
+            background-color: #002255;
+        }
+        
+        .winner {
+            background-color: rgba(255, 204, 0, 0.3) !important;
+        }
+        
+        .winner td {
+            font-weight: bold;
+        }
+        
+        .position {
+            width: 15%;
+        }
+        
+        .team-name-col {
+            width: 55%;
+            text-align: left;
+        }
+        
+        .score-col {
+            width: 30%;
+        }
+        
+        .results-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+        }
+        
+        .results-buttons button {
+            width: 45%;
         }
         
         @keyframes fadeIn {
@@ -294,6 +379,24 @@
             
             .question-text {
                 font-size: 1.2rem;
+            }
+            
+            .toggle-buttons {
+                flex-direction: column;
+            }
+            
+            .toggle-buttons button {
+                width: 100%;
+                margin-top: 10px;
+            }
+            
+            .results-buttons {
+                flex-direction: column;
+            }
+            
+            .results-buttons button {
+                width: 100%;
+                margin-top: 10px;
             }
         }
     </style>
@@ -366,6 +469,7 @@
         <div id="game-page" class="page">
             <div class="toggle-buttons">
                 <button id="back-to-setup">Back to Setup</button>
+                <button id="end-game">End Game</button>
             </div>
             
             <div class="scoreboard" id="scoreboard">
@@ -374,6 +478,30 @@
             
             <div class="game-board" id="game-board">
                 <!-- Game board will be dynamically built here -->
+            </div>
+        </div>
+        
+        <!-- Results Page -->
+        <div id="results-page" class="page">
+            <div class="leaderboard">
+                <h2 class="leaderboard-title">RESULTS</h2>
+                <table class="leaderboard-table" id="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th class="position">Position</th>
+                            <th class="team-name-col">Team</th>
+                            <th class="score-col">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- Leaderboard rows will be dynamically added here -->
+                    </tbody>
+                </table>
+                
+                <div class="results-buttons">
+                    <button id="play-again">Play Again</button>
+                    <button id="new-game">New Game</button>
+                </div>
             </div>
         </div>
     </div>
@@ -400,6 +528,7 @@
             // DOM Elements
             const setupPage = document.getElementById('setup-page');
             const gamePage = document.getElementById('game-page');
+            const resultsPage = document.getElementById('results-page');
             const numTeamsSelect = document.getElementById('num-teams');
             const teamNamesContainer = document.getElementById('team-names-container');
             const numCategoriesSelect = document.getElementById('num-categories');
@@ -407,6 +536,7 @@
             const categoriesContainer = document.getElementById('categories-container');
             const startGameButton = document.getElementById('start-game');
             const backToSetupButton = document.getElementById('back-to-setup');
+            const endGameButton = document.getElementById('end-game');
             const scoreboardContainer = document.getElementById('scoreboard');
             const gameBoardContainer = document.getElementById('game-board');
             const questionModal = document.getElementById('question-modal');
@@ -415,9 +545,14 @@
             const showAnswerButton = document.getElementById('show-answer');
             const closeQuestionButton = document.getElementById('close-question');
             const awardButtonsContainer = document.getElementById('award-buttons');
+            const leaderboardBody = document.getElementById('leaderboard-body');
+            const playAgainButton = document.getElementById('play-again');
+            const newGameButton = document.getElementById('new-game');
             
             let currentQuestion = null;
             let teamScores = [];
+            let questionAnswered = 0;
+            let totalQuestions = 0;
             
             // Initialize team names input fields
             function updateTeamNameInputs() {
@@ -541,6 +676,10 @@
                 const numCategories = parseInt(numCategoriesSelect.value);
                 const numQuestions = parseInt(numQuestionsSelect.value);
                 
+                // Calculate total questions
+                totalQuestions = numCategories * numQuestions;
+                questionAnswered = 0;
+                
                 // Set grid template columns based on number of categories
                 gameBoardContainer.style.gridTemplateColumns = `repeat(${numCategories}, 1fr)`;
                 
@@ -572,6 +711,7 @@
                             if (!this.classList.contains('used')) {
                                 openQuestion(i, j, pointValue);
                                 this.classList.add('used');
+                                questionAnswered++;
                             }
                         });
                         
@@ -649,6 +789,11 @@
             function closeQuestionModal() {
                 questionModal.style.display = 'none';
                 showAnswerButton.style.display = 'block';
+                
+                // Check if all questions have been answered
+                if (questionAnswered === totalQuestions) {
+                    endGame();
+                }
             }
             
             // Toggle Q&A visibility
@@ -665,6 +810,36 @@
                 toggleButton.textContent = isHidden ? 'Hide Q&A Fields' : 'Show Q&A Fields';
             }
             
+            // End game and show results
+            function endGame() {
+                // Sort teams by score (highest to lowest)
+                const rankedTeams = [...teamScores].sort((a, b) => b.score - a.score);
+                
+                // Build leaderboard
+                leaderboardBody.innerHTML = '';
+                
+                rankedTeams.forEach((team, index) => {
+                    const row = document.createElement('tr');
+                    
+                    // Highlight the winner(s)
+                    if (index === 0 || (index > 0 && team.score === rankedTeams[0].score)) {
+                        row.className = 'winner';
+                    }
+                    
+                    row.innerHTML = `
+                        <td class="position">${index + 1}</td>
+                        <td class="team-name-col">${team.name}</td>
+                        <td class="score-col">$${team.score}</td>
+                    `;
+                    
+                    leaderboardBody.appendChild(row);
+                });
+                
+                // Show results page
+                gamePage.classList.remove('active');
+                resultsPage.classList.add('active');
+            }
+            
             // Event Listeners
             numTeamsSelect.addEventListener('change', updateTeamNameInputs);
             numCategoriesSelect.addEventListener('change', updateCategoryInputs);
@@ -679,6 +854,20 @@
             
             backToSetupButton.addEventListener('click', function() {
                 gamePage.classList.remove('active');
+                setupPage.classList.add('active');
+            });
+            
+            endGameButton.addEventListener('click', endGame);
+            
+            playAgainButton.addEventListener('click', function() {
+                resultsPage.classList.remove('active');
+                gamePage.classList.add('active');
+                buildScoreboard();
+                buildGameBoard();
+            });
+            
+            newGameButton.addEventListener('click', function() {
+                resultsPage.classList.remove('active');
                 setupPage.classList.add('active');
             });
             
