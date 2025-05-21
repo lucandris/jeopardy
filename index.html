@@ -110,19 +110,6 @@
             margin: 0;
             margin-bottom: 15px;
         }
-
-        #save-config, #upload-config {
-            background-color: #006699;
-            color: white;
-            margin: 0;
-            margin-bottom: 15px;
-            width: 48%;
-            display: inline-block;
-        }
-        
-        #save-config {
-            margin-right: 2%;
-        }
         
         button:hover {
             background-color: #FFD700;
@@ -520,12 +507,6 @@
                 
                 <div class="form-group">
                     <button type="button" id="toggle-qa">Hide Q&A Fields</button>
-                </div>
-                
-                <div class="form-group">
-                    <button type="button" id="save-config">Save Configuration</button>
-                    <button type="button" id="upload-config">Upload Configuration</button>
-                    <input type="file" id="config-file-input" accept=".json" style="display: none;">
                 </div>
 
                 <div id="categories-container" class="category-container">
@@ -1004,10 +985,6 @@
             showAnswerButton.addEventListener('click', showAnswer);
             closeQuestionButton.addEventListener('click', closeQuestionModal);
             document.getElementById('toggle-qa').addEventListener('click', toggleQAVisibility);
-
-            document.getElementById('save-config').addEventListener('click', saveGameConfig);
-            document.getElementById('upload-config').addEventListener('click', uploadGameConfig);
-            document.getElementById('config-file-input').addEventListener('change', handleConfigFileUpload);
             
             // Initialize the form
             updateTeamNameInputs();
