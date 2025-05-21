@@ -409,6 +409,34 @@
                 width: 100%;
                 margin-top: 10px;
             }
+
+            .timer-container {
+                margin: 15px auto;
+                width: 100%;
+                height: 30px;
+                position: relative;
+                background-color: #001F3F;
+                border-radius: 15px;
+                overflow: hidden;
+            }
+            
+            .timer-bar {
+                height: 100%;
+                background-color: #FFCC00;
+                width: 100%;
+                transition: width 1s linear;
+            }
+            
+            .timer-text {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: black;
+                font-weight: bold;
+                font-size: 1.2rem;
+                text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
+            }
         }
     </style>
 </head>
@@ -461,6 +489,19 @@
                         <option value="8">8</option>
                         <option value="9">9</option>
                         <option value="10">10</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="timer-seconds">Question Timer (seconds):</label>
+                    <select id="timer-seconds">
+                        <option value="0">No Timer</option>
+                        <option value="10">10 seconds</option>
+                        <option value="15">15 seconds</option>
+                        <option value="20">20 seconds</option>
+                        <option value="30" selected>30 seconds</option>
+                        <option value="45">45 seconds</option>
+                        <option value="60">60 seconds</option>
                     </select>
                 </div>
                 
@@ -521,6 +562,10 @@
     <div id="question-modal" class="modal">
         <div class="modal-content">
             <div class="question-text" id="modal-question"></div>
+            <div class="timer-container" id="timer-container" style="display: none;">
+                <div class="timer-bar" id="timer-bar"></div>
+                <div class="timer-text" id="timer-text">30</div>
+            </div>
             <div class="answer-text" id="modal-answer"></div>
             
             <div class="modal-buttons">
@@ -559,6 +604,13 @@
             const leaderboardBody = document.getElementById('leaderboard-body');
             const playAgainButton = document.getElementById('play-again');
             const newGameButton = document.getElementById('new-game');
+
+            let timerInterval = null;
+            let timerSeconds = 0;
+            let remainingTime = 0;
+            const timerContainer = document.getElementById('timer-container');
+            const timerBar = document.getElementById('timer-bar');
+            const timerText = document.getElementById('timer-text');
             
             let currentQuestion = null;
             let teamScores = [];
@@ -588,7 +640,40 @@
                     teamNamesContainer.appendChild(teamGroup);
                 }
             }
-            
+
+            function startTimer() {
+                // Get timer value from select
+                timerSeconds = parseInt(document.getElementById('timer-seconds').value);
+                
+                // If timer is disabled, return
+                if (timerSeconds <= 0) {
+                    timerContainer.style.display = 'none';
+                    return;
+                }
+                
+                // Reset and show timer
+                remainingTime = timerSeconds;
+                timerText.textContent = remainingTime;
+                timerBar.style.width = '100%';
+                timerContainer.style.display = 'block';
+                
+                // Clear any existing timer
+                if (timerInterval) clearInterval(timerInterval);
+                
+                // Start new timer
+                timerInterval = setInterval(function() {
+                    remainingTime--;
+                    timerText.textContent = remainingTime;
+                    timerBar.style.width = (remainingTime / timerSeconds * 100) + '%';
+                    
+                    // Timer ran out
+                    if (remainingTime <= 0) {
+                        clearInterval(timerInterval);
+                        timerText.textContent = 'Time\'s up!';
+                        showAnswer(); // Automatically show the answer
+                    }
+                }, 1000);
+            }
             // Initialize category inputs
             function updateCategoryInputs() {
                 const numCategories = parseInt(numCategoriesSelect.value);
@@ -755,12 +840,20 @@
                 awardButtonsContainer.style.display = 'none';
                 
                 questionModal.style.display = 'flex';
+                // Start the timer
+                startTimer();
             }
             
             // Show answer
             function showAnswer() {
                 modalAnswer.style.display = 'block';
                 showAnswerButton.style.display = 'none';
+                
+                // Clear the timer
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
                 
                 // Create award buttons for each team
                 awardButtonsContainer.innerHTML = '';
@@ -800,6 +893,12 @@
             function closeQuestionModal() {
                 questionModal.style.display = 'none';
                 showAnswerButton.style.display = 'block';
+                
+                // Clear the timer
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
                 
                 // Check if all questions have been answered
                 if (questionAnswered === totalQuestions) {
