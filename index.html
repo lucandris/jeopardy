@@ -554,7 +554,9 @@
                         <option value="60">60 seconds</option>
                     </select>
                 </div>
-                
+                <div class="form-group">
+                    <button type="button" id="clear-data" style="background-color: #CC0000; color: white;">Clear Saved Data</button>
+                </div>
                 <div class="form-group">
                     <button type="button" id="toggle-qa">Hide Q&A Fields</button>
                 </div>
@@ -667,6 +669,97 @@
             let teamScores = [];
             let questionAnswered = 0;
             let totalQuestions = 0;
+            
+            // Save data to localStorage
+            function saveToStorage() {
+                const data = {
+                    numTeams: numTeamsSelect.value,
+                    numCategories: numCategoriesSelect.value,
+                    numQuestions: numQuestionsSelect.value,
+                    timerSeconds: document.getElementById('timer-seconds').value,
+                    teamNames: {},
+                    categories: {},
+                    questions: {},
+                    answers: {}
+                };
+                
+                // Save team names
+                for (let i = 1; i <= 10; i++) {
+                    const teamInput = document.getElementById(`team-name-${i}`);
+                    if (teamInput) {
+                        data.teamNames[i] = teamInput.value;
+                    }
+                }
+                
+                // Save categories, questions, and answers
+                for (let i = 1; i <= 10; i++) {
+                    const categoryInput = document.getElementById(`category-${i}`);
+                    if (categoryInput) {
+                        data.categories[i] = categoryInput.value;
+                    }
+                    
+                    for (let j = 1; j <= 10; j++) {
+                        const questionInput = document.getElementById(`question-${i}-${j}`);
+                        const answerInput = document.getElementById(`answer-${i}-${j}`);
+                        if (questionInput) data.questions[`${i}-${j}`] = questionInput.value;
+                        if (answerInput) data.answers[`${i}-${j}`] = answerInput.value;
+                    }
+                }
+                
+                localStorage.setItem('jeopardyData', JSON.stringify(data));
+            }
+            
+            // Load data from localStorage
+            function loadFromStorage() {
+                const savedData = localStorage.getItem('jeopardyData');
+                if (!savedData) return;
+                
+                const data = JSON.parse(savedData);
+                
+                // Restore select values
+                numTeamsSelect.value = data.numTeams || '2';
+                numCategoriesSelect.value = data.numCategories || '6';
+                numQuestionsSelect.value = data.numQuestions || '5';
+                document.getElementById('timer-seconds').value = data.timerSeconds || '30';
+                
+                // Trigger updates to create the form fields
+                updateTeamNameInputs();
+                updateCategoryInputs();
+                
+                // Use setTimeout to ensure fields are created before populating
+                setTimeout(() => {
+                    // Restore team names
+                    Object.keys(data.teamNames || {}).forEach(i => {
+                        const teamInput = document.getElementById(`team-name-${i}`);
+                        if (teamInput && data.teamNames[i]) {
+                            teamInput.value = data.teamNames[i];
+                        }
+                    });
+                    
+                    // Restore categories
+                    Object.keys(data.categories || {}).forEach(i => {
+                        const categoryInput = document.getElementById(`category-${i}`);
+                        if (categoryInput && data.categories[i]) {
+                            categoryInput.value = data.categories[i];
+                        }
+                    });
+                    
+                    // Restore questions and answers
+                    Object.keys(data.questions || {}).forEach(key => {
+                        const questionInput = document.getElementById(`question-${key}`);
+                        if (questionInput && data.questions[key]) {
+                            questionInput.value = data.questions[key];
+                        }
+                    });
+                    
+                    Object.keys(data.answers || {}).forEach(key => {
+                        const answerInput = document.getElementById(`answer-${key}`);
+                        if (answerInput && data.answers[key]) {
+                            answerInput.value = data.answers[key];
+                        }
+                    });
+                }, 100);
+            }
             
             // Initialize team names input fields
             function updateTeamNameInputs() {
@@ -1038,10 +1131,31 @@
             showAnswerButton.addEventListener('click', showAnswer);
             closeQuestionButton.addEventListener('click', closeQuestionModal);
             document.getElementById('toggle-qa').addEventListener('click', toggleQAVisibility);
+
+            // Save data when inputs change
+            numTeamsSelect.addEventListener('change', saveToStorage);
+            numCategoriesSelect.addEventListener('change', saveToStorage);
+            numQuestionsSelect.addEventListener('change', saveToStorage);
+            document.getElementById('timer-seconds').addEventListener('change', saveToStorage);
+            
+            // Add input event listeners to save when typing
+            document.addEventListener('input', function(e) {
+                if (e.target.matches('[id^="team-name-"], [id^="category-"], [id^="question-"], [id^="answer-"]')) {
+                    saveToStorage();
+                }
+            });
+
+            document.getElementById('clear-data').addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear all saved data?')) {
+                    localStorage.removeItem('jeopardyData');
+                    location.reload();
+                }
+            });
             
             // Initialize the form
             updateTeamNameInputs();
             updateCategoryInputs();
+            loadFromStorage();
         });
     </script>
 </body>
